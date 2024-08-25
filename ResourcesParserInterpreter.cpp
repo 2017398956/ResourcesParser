@@ -1,6 +1,7 @@
 #include "ResourcesParserInterpreter.h"
 #include <iostream>
 #include <sstream>
+#include <cstring>
 
 #define ID(x) (x + 1)
 #define MAKE_RESOURCE_ID(PACKAGE,TYPE,INDEX) ((PACKAGE<<24) | (TYPE<<16) | INDEX)
