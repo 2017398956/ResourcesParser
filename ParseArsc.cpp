@@ -165,7 +165,7 @@ static int isType(const char* typeName, uint8_t id, vector<string> destTypesPool
 
 int parseArsc(const char* arscFile)
 {
-	const char* concernType = "string1";
+	const char* concernType = "mipmap";
 	struct ResChunk_header header;
 	//FILE* pFile = fopen(fileName, "rb");
 	FILE* pFile;
@@ -263,7 +263,6 @@ int parseArsc(const char* arscFile)
 		idStringPoolHeader.stylesStart);
 	unsigned char* idStringsData = readStringsDataFromStringPool(pFile, idStringPoolHeader);
 	//getStringsFromStringPoolData(idStringPoolHeader, idStringsData, false);
-	free(idStringsData);
 	// 8.读取资源 SPEC 数组
 	struct ResTable_typeSpec resTypeSpecHeader;
 	while (fread((void*)&resTypeSpecHeader, sizeof(struct ResTable_typeSpec), 1, pFile)) {
@@ -341,7 +340,14 @@ int parseArsc(const char* arscFile)
 				struct ResTable_entry* pEntry = (struct ResTable_entry*)(pData + offset);
 				if (isType(concernType, resTypeHeader.id, resTypes))
 				{
-					printf("\t\tentryKeyIndex: 0x%x\n", pEntry->key.index);
+					// 获取 ResTable_entry 对应的 id 的名称，key.index 对应 id 区域中的位置
+					printf("\t\tid name:");
+					printStringFromStringsPool(
+						(uint32_t*)idStringsData,
+						(char*)idStringsData + (idStringPoolHeader.stringsStart - sizeof(struct ResStringPool_header)),
+						pEntry->key.index,
+						idStringPoolHeader.flags & ResStringPool_header::UTF8_FLAG
+					);
 				}
 
 
@@ -371,6 +377,7 @@ int parseArsc(const char* arscFile)
 		}
 	}
 
+	free(idStringsData);
 	free(pGlobalStrings);
 	fclose(pFile);
 	return 0;
