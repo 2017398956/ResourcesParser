@@ -1,7 +1,7 @@
 #ifndef RESOURCES_PARSER_H
 #define RESOURCES_PARSER_H
 
-#include "ResourceTypes.h"
+#include "android/ResourceTypes.h"
 
 #include <string>
 #include <list>

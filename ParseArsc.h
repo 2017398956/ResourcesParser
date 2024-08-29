@@ -1,6 +1,3 @@
-/**
- * 测试 arsc 文件解析
- */
 #ifndef PARSE_ARSC_H
 #define PARSE_ARSC_H
 
