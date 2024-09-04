@@ -856,5 +856,31 @@ struct ResTable_map
     Res_value value;
 };
 
+/**
+ * A package-id to package name mapping for any shared libraries used
+ * in this resource table. The package-id's encoded in this resource
+ * table may be different than the id's assigned at runtime. We must
+ * be able to translate the package-id's based on the package name.
+ */
+struct ResTable_lib_header
+{
+    struct ResChunk_header header;
+
+    // The number of shared libraries linked in this resource table.
+    uint32_t count;
+};
+
+/**
+ * A shared library package-id to package name entry.
+ */
+struct ResTable_lib_entry
+{
+    // The package-id this shared library was assigned at build time.
+    // We use a uint32 to keep the structure aligned on a uint32 boundary.
+    uint32_t packageId;
+
+    // The package name of the shared library. \0 terminated.
+    uint16_t packageName[128];
+};
 
 #endif  /*RESOURCE_TYPES_H*/
