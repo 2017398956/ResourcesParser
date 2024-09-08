@@ -3,6 +3,7 @@
  */
 #include "ParseArsc.h"
 #include "ParseUtil.h"
+#include <string.h>
 #include "android/ResourceTypes.h"
 
 using namespace std;
@@ -126,6 +127,7 @@ int parseArsc(const char* arscFile)
 				break;
 			}
 			int printConcernType = isType(concernType, resTypeSpecHeader.id, resTypes);
+			// printConcernType = 0;
 			if (printConcernType)
 			{
 				if (resTypeSpecHeader.id >= 1 && resTypeSpecHeader.id <= resTypes.size())
@@ -204,31 +206,42 @@ int parseArsc(const char* arscFile)
 					struct ResTable_entry* pEntry = (struct ResTable_entry*)(pData + offset);
 					if (printConcernType)
 					{
-						// 获取 ResTable_entry 对应的 id 的名称，key.index 对应 id 区域中的位置
-						printf("\t\tEntry: id value:0x%x, id name:", resTablePackage.id << 24 | resTypeHeader.id << 16 | i);
-						printStringFromStringsPool(
+						const char* entryName = getStringFromStringsPool(
 							(uint32_t*)idStringsData,
 							(char*)idStringsData + (idStringPoolHeader.stringsStart - sizeof(struct ResStringPool_header)),
 							pEntry->key.index,
 							idStringPoolHeader.flags & ResStringPool_header::UTF8_FLAG
 						);
+						// 获取 ResTable_entry 对应的 id 的名称，key.index 对应 id 区域中的位置
+						printf("\t\tEntry: id value:0x%x, id name:%s\n", resTablePackage.id << 24 | resTypeHeader.id << 16 | i, entryName);
 					}
+					const char* entryName = getStringFromStringsPool(
+							(uint32_t*)idStringsData,
+							(char*)idStringsData + (idStringPoolHeader.stringsStart - sizeof(struct ResStringPool_header)),
+							pEntry->key.index,
+							idStringPoolHeader.flags & ResStringPool_header::UTF8_FLAG
+						);
 					// 13.根据 Entry 的 flags 判断 Entry 的实际数据类型
 					if (pEntry->flags & ResTable_entry::FLAG_COMPLEX) {
 						struct ResTable_map_entry* pMapEntry = (struct ResTable_map_entry*)(pData + offset);
 						for (int i = 0; i < pMapEntry->count; i++) {
 							struct ResTable_map* pMap =
 								(struct ResTable_map*)(pData + offset + pMapEntry->size + i * sizeof(struct ResTable_map));
-							if (printConcernType)
+							if (printConcernType 
+								// || strcmp(entryName, "Theme.Apk_jiagu") == 0
+								)
 							{
 								printf("\t\t\tparentRef:0x%x, ", pMapEntry->parent.ident);
-								printf("name:0x%08x, valueType:%u, value:%u\n", pMap->name.ident, pMap->value.dataType, pMap->value.data);
+								printf("name:0x%08x, valueType:%u, value:0x%x, ", pMap->name.ident, pMap->value.dataType, pMap->value.data);
+								printValue(&(pMap->value), globalStringPoolHeader, pGlobalStrings);
 							}
 						}
 					}
 					else {
 						struct Res_value* pValue = (struct Res_value*)((unsigned char*)pEntry + sizeof(struct ResTable_entry));
-						if (printConcernType)
+						if (printConcernType 
+							// || strcmp(entryName, "Theme.Apk_jiagu") == 0
+							)
 						{
 							printf("\t\t\tvalue.data:0x%x, value :", pValue->data);
 							printValue(pValue, globalStringPoolHeader, pGlobalStrings);
